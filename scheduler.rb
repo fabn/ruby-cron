@@ -7,25 +7,22 @@ require 'logger'
 logger = Logger.new(STDOUT)
 
 require 'rufus-scheduler'
-scheduler = Rufus::Scheduler.new
+scheduler = Rufus::Scheduler.singleton
 
-scheduler.in '3s' do
-  logger.info 'Hello... Rufus, one shot'
-  sleep 8
-  logger.info 'one shot completed'
+logger.info 'Rufus scheduler started'
+
+# Shutdown procedure, wait for running jobs then exit
+shutdown = proc do
+  # Using a thread otherwise lock won't work
+  Thread.new { logger.debug 'Scheduler shutdown initiated' }  
+  scheduler.shutdown(:wait)
 end
 
-scheduler.every '3s' do
-  logger.debug 'Periodic schedule'
-  sleep 3
-  logger.debug 'Periodic ended'
-end
+# Intercept INT and TERM signal initiating a shutdown
+trap :INT, &shutdown
+trap :TERM, &shutdown
 
-scheduler.in '10s' do
-  logger.info 'Killing scheduler'
-  logger.debug 'Requesting termination for scheduler'
-  scheduler.stop(terminate: false)
-end
+load 'jobs' if File.exists? 'jobs.rb'
 
 scheduler.join
 logger.debug 'All jobs have been terminated, exiting'

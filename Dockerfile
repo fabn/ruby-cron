@@ -11,5 +11,5 @@ RUN bundle install --deployment --without development:test --jobs 4 --retry 3
 
 # Add the other code
 ADD . /app
-
-CMD ["bundle exec scheduler.rb"]
+# Run the scheduler file
+CMD bundle exec ./scheduler.rb
