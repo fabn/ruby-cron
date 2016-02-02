@@ -1,4 +1,4 @@
-FROM ruby:2.3-alpine
+FROM ruby:2.3
 MAINTAINER Fabio Napoleoni <f.napoleoni@gmail.com>
 
 WORKDIR /app
