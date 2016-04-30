@@ -54,7 +54,20 @@ scheduler.every '3s' do
   $logger.debug "Scheduler is alive and there are #{scheduler.jobs.size - 1} job(s) scheduled"
 end
 
-load 'jobs.rb' if File.exists? 'jobs.rb'
+# Allow parameterized job file
+JOB_FILE = ENV.fetch('JOB_FILE', 'jobs.rb')
+# Load a job file if found
+load JOB_FILE if File.exists?(JOB_FILE)
+
+# Allow parameterized job directory
+JOB_DIR = ENV['JOB_DIR']
+
+# Allow to pass a folder of jobfiles
+if JOB_DIR && Dir.exist?(JOB_DIR)
+  Dir[File.join(File.realpath(JOB_DIR), '**/*.rb')].each do |jobfile|
+    load jobfile
+  end
+end
 
 scheduler.join
 $logger.info 'All jobs have been terminated, exiting'
